@@ -3,9 +3,9 @@
 
 hostname=$(hostname)
 diff_acceptable=10
-slack_token="___________________"
-bsc_scan_token="___________________"
-eth_scan_token="___________________"
+slack_token="------------------------"
+bsc_scan_token="------------------------"
+eth_scan_token="------------------------"
 
 # Matic test
 if [ ! -z $(echo $hostname|grep matic) ]; then
@@ -37,6 +37,13 @@ if [ ! -z $(echo $hostname|grep kusama) ]; then
     last_local_block=$(curl -ks --request POST --url http://localhost:8082/v1/graphql --header 'Content-Type: application/json' --header 'x-hasura-admin-secret: klever' --data '{"query":"query GetBlocks {\n  block(limit: 1, order_by: {block_number: desc})  {\n    block_number\n    block_hash\n    total_extrinsics\n    finalized\n    timestamp\n  }\n}","operationName":"GetBlocks"}'|jq '.data.block[0].block_number')
     remote_block=$(curl -sS -X POST -H "x-api-key: YOUR_KEY" https://kusama.api.subscan.io/api/scan/metadata|jq '.data.blockNum'|sed 's/\"//g')
     network='KUSAMA'
+fi
+
+# btc test
+if [ ! -z $(echo $hostname|grep btc) ]; then
+    last_local_block=$(curl -ks http://localhost:9130/api/v3|jq '.blockbook.bestHeight')
+    remote_block=$(curl -ks https://chain.api.btc.com/v3/block/latest|jq '.data.height')
+    network='BTC'
 fi
 
 # echo $last_local_block $remote_block
